@@ -6,6 +6,8 @@ Claud-Ear connects your AI agent (Hermes Agent, Claude Code, Codex CLI, etc.) to
 
 **Default LLM backend: Ollama** (configurable to any OpenAI-compatible API).
 
+---
+
 ## What It Does
 
 | Capability | Model/Tool |
@@ -17,6 +19,8 @@ Claud-Ear connects your AI agent (Hermes Agent, Claude Code, Codex CLI, etc.) to
 | ⬇️ **Audio downloading** — download from YouTube, Spotify, etc. | yt-dlp |
 | 🏥 **Audio surgery** — EQ, stem manipulation, dynamics processing | sonic_surgery |
 | 🎹 **Beat production** — generate beats, chord progressions, melodies | beat_studio + MIDI |
+
+---
 
 ## Quick Start
 
@@ -80,6 +84,8 @@ Or for Claude Code:
 claude mcp add claud-ear -- uv run claud-ear
 ```
 
+---
+
 ## Tools
 
 ### `deep_listen(file_path)`
@@ -103,31 +109,35 @@ EQ adjustments, stem manipulation, dynamics processing.
 ### `generate_beat(genre, bpm, bars)`
 Generate a beat with chord progressions, melodies, and drum patterns as MIDI.
 
+---
+
 ## Architecture
 
 ```
 claud-ear/
-├── server.py              # MCP server (FastMCP) — the main entry point
-├── llm_backend.py          # Configurable LLM API client (Ollama/OpenAI)
+├── server.py              # MCP server (FastMCP) — main entry point
+├── llm_backend.py         # Configurable LLM API client (Ollama/OpenAI)
 ├── agent.py               # Autonomous batch analysis agent
-├── beat_studio.py          # Beat production engine
-├── quality.py              # Audio quality assessment
-├── discovery.py            # Music discovery tools
-├── song_db.py              # Track metadata & lyrics database
-├── sonic_surgery.py        # Audio repair & enhancement
-├── extractor.py            # Feature extraction pipeline
-├── download_playlists.py   # Bulk downloader
-├── analyze_bass.py         # Bass frequency analysis
-├── analyze_bitter.py       # Mood/valence classifier
-├── charts.py               # Billboard chart integration
-├── power.py                # Energy/sleep scheduling
-├── dashboard.py            # Web dashboard
-├── query.py                # Natural language music search
-├── start_agent.sh          # Start autonomous agent
-├── stop_agent.sh           # Stop autonomous agent
-├── pause_at_130.sh         # Pause agent during peak hours
-└── docs/                   # Design docs & implementation plans
+├── beat_studio.py         # Beat production engine
+├── quality.py             # Audio quality assessment
+├── discovery.py           # Music discovery tools
+├── song_db.py             # Track metadata & lyrics database
+├── sonic_surgery.py       # Audio repair & enhancement
+├── extractor.py           # Feature extraction pipeline
+├── download_playlists.py  # Bulk downloader
+├── analyze_bass.py        # Bass frequency analysis
+├── analyze_bitter.py      # Mood/valence classifier
+├── charts.py              # Billboard chart integration
+├── power.py               # Energy/sleep scheduling
+├── dashboard.py           # Web dashboard
+├── query.py               # Natural language music search
+├── start_agent.sh         # Start autonomous agent
+├── stop_agent.sh          # Stop autonomous agent
+├── pause_at_130.sh        # Pause agent during peak hours
+└── docs/                  # Design docs & implementation plans
 ```
+
+---
 
 ## Autonomous Agent
 
@@ -145,6 +155,8 @@ uv run python agent.py --one
 ```
 
 The agent scans `~/Documents/music/music data/`, finds pending tracks, analyzes them using the configured LLM backend, and writes full analysis documents to `~/Documents/music/analyses/`.
+
+---
 
 ## License
 
