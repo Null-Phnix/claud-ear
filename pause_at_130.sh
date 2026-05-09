@@ -1,14 +1,15 @@
-#!/bin/bash
-OUTPUT="/private/tmp/claude-501/-Users-josii-Desktop-audio-mcp-review/tasks/bdltsnmdi.output"
-TARGET=130
+#!/usr/bin/env bash
+# Pause agent during peak hours (1:30 PM) to avoid GPU congestion
+# Used by the music intelligence agent for power scheduling
 
-echo "Watching for track $TARGET to complete..."
-while true; do
-    COUNT=$(grep -c "Done in" "$OUTPUT" 2>/dev/null || echo 0)
-    if [ "$COUNT" -ge "$TARGET" ]; then
-        echo "Reached $TARGET tracks! Stopping transcription..."
-        pkill -f "transcribe_all_remaining" && echo "Process stopped." || echo "Process already stopped."
-        break
-    fi
-    sleep 30
-done
+# Check if agent process is running
+AGENT_PID=$(pgrep -f "agent.py" 2>/dev/null)
+
+if [ -z "$AGENT_PID" ]; then
+    echo "Agent not running. Nothing to pause."
+    exit 0
+fi
+
+echo "Pausing agent (PID $AGENT_PID) at $(date)"
+kill -STOP "$AGENT_PID"
+echo "Agent paused. Run stop_agent.sh to resume/stop."

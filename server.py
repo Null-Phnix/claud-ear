@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 """
-Audio Understanding MCP Server v4 — Performance & Scalability Edition.
+Audio Understanding MCP Server — Hermes/Native Edition.
 
-Gives Claude the ability to natively listen to and understand music/audio.
+Gives your AI agent the ability to natively listen to and understand music/audio.
+Works with any MCP-compatible client (Hermes Agent, Claude Code, Codex CLI, etc.).
 Combines:
   - CLAP for semantic audio understanding (genre, mood, instruments)
   - Demucs for source separation (vocals, drums, bass, other)
@@ -1815,8 +1816,8 @@ def deep_listen(file_path: str, max_duration: float = 120.0) -> str:
     """
     The most comprehensive analysis tool. Separates the track into stems,
     transcribes lyrics, detects chords, analyzes song structure, examines
-    vocal characteristics, and classifies rhythm patterns. This gives Claude
-    the closest experience to actually hearing the music.
+    vocal characteristics, and classifies rhythm patterns. This gives your
+    agent the closest experience to actually hearing the music.
 
     Slower than other tools (30-90 seconds) but returns everything.
 

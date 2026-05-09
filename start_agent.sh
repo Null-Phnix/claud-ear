@@ -1,14 +1,17 @@
-#!/bin/bash
-# Start the Music Intelligence Agent in the background
-cd /Users/josii/Desktop/audio-mcp-review
+#!/usr/bin/env bash
+# Start the autonomous music intelligence agent
+set -e
 
-# Check if already running
-if pgrep -f "python agent.py" > /dev/null; then
-    echo "Agent is already running (PID $(pgrep -f 'python agent.py'))"
-    exit 1
-fi
+cd "$(dirname "$0")"
 
-nohup env -u CLAUDECODE uv run python agent.py >> agent.log 2>&1 &
-PID=$!
-echo "Agent started (PID $PID)"
-echo "Logs: tail -f /Users/josii/Desktop/audio-mcp-review/agent.log"
+echo "Starting Music Intelligence Agent..."
+echo "Music dir: $HOME/Documents/music/music data/"
+echo "Analyses dir: $HOME/Documents/music/analyses/"
+
+# Run the agent in background
+nohup python agent.py >> agent.log 2>&1 &
+
+AGENT_PID=$!
+echo "Agent started (PID: $AGENT_PID)"
+echo "Logs: agent.log"
+echo "Stop with: ./stop_agent.sh"

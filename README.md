@@ -1,8 +1,10 @@
-# 🎧 Claud-Ear
+# 🔈 Claud-Ear
 
-> Give Claude the ability to **listen to and understand music/audio files** through MCP.
+> Give your AI agent the ability to **listen to and understand music/audio files** — works with ANY MCP client.
 
-Claud-Ear is an MCP (Model Context Protocol) server that connects Claude to a full audio intelligence pipeline. Drop in an MP3, WAV, FLAC, OGG, M4A, or OPUS file and Claude can analyze, separate, transcribe, and understand it.
+Claud-Ear connects your AI agent (Hermes Agent, Claude Code, Codex CLI, etc.) to a full audio intelligence pipeline. Drop in an MP3, WAV, FLAC, OGG, M4A, or OPUS file and your agent can analyze, separate, transcribe, and understand it.
+
+**Default LLM backend: Ollama** (configurable to any OpenAI-compatible API).
 
 ## What It Does
 
@@ -21,6 +23,7 @@ Claud-Ear is an MCP (Model Context Protocol) server that connects Claude to a fu
 ### Prerequisites
 - Python 3.11–3.13
 - CUDA-capable GPU recommended (CPU-only works but is slower)
+- [Ollama](https://ollama.com) running locally (default) or any OpenAI-compatible API
 - [uv](https://docs.astral.sh/uv/) (recommended) or pip
 
 ### Install & Run
@@ -30,16 +33,36 @@ Claud-Ear is an MCP (Model Context Protocol) server that connects Claude to a fu
 git clone https://github.com/Null-Phnix/claud-ear.git
 cd claud-ear
 
-# Install with uv (recommended)
+# Install with uv
 uv sync
+
+# Test the LLM backend
+uv run python llm_backend.py
 
 # Run the MCP server
 uv run claud-ear
 ```
 
-### Connect to Claude
+### Configuration
 
-Add to your `.mcp.json`:
+By default, Claud-Ear connects to Ollama at `http://localhost:11434` using `llama3.1:8b`. To customize:
+
+```bash
+export AUDIO_LLM_MODEL=llama3.1:8b     # model name
+export AUDIO_LLM_HOST=http://localhost:11434  # API endpoint
+export AUDIO_LLM_PROVIDER=ollama       # or "openai" for OpenAI-compatible APIs
+```
+
+For OpenAI-compatible providers (vLLM, TGI, LiteLLM, etc.):
+```bash
+export AUDIO_LLM_PROVIDER=openai
+export AUDIO_LLM_HOST=http://localhost:8000
+export AUDIO_LLM_MODEL=meta-llama/Llama-3.1-8B-Instruct
+```
+
+### Connect to Your Agent
+
+**Hermes Agent** (or any MCP client) — add to your MCP config:
 
 ```json
 {
@@ -52,7 +75,10 @@ Add to your `.mcp.json`:
 }
 ```
 
-Or add it to Claude Desktop's MCP config.
+Or for Claude Code:
+```bash
+claude mcp add claud-ear -- uv run claud-ear
+```
 
 ## Tools
 
@@ -63,25 +89,26 @@ Full analysis pipeline — semantic understanding, source separation, transcript
 Quick analysis — genre, mood, instruments, tempo, key. Lighter than deep_listen.
 
 ### `separate_stems(file_path)`
-Isolate vocals, drums, bass, and other stems from a track.
+Isolate vocals, drums, bass, and other stems from a track as separate audio files.
 
 ### `transcribe_lyrics(file_path)`
 Extract and transcribe lyrics from vocals.
 
 ### `search_and_download(query)`
-Search for and download audio from YouTube, Spotify, etc.
+Search for and download audio from YouTube and other platforms via yt-dlp.
 
 ### `sonic_surgery(file_path, operation, **params)`
 EQ adjustments, stem manipulation, dynamics processing.
 
 ### `generate_beat(genre, bpm, bars)`
-Generate a beat with chord progressions, melodies, and drum patterns.
+Generate a beat with chord progressions, melodies, and drum patterns as MIDI.
 
 ## Architecture
 
 ```
 claud-ear/
-├── server.py              # MCP server (FastMCP)
+├── server.py              # MCP server (FastMCP) — the main entry point
+├── llm_backend.py          # Configurable LLM API client (Ollama/OpenAI)
 ├── agent.py               # Autonomous batch analysis agent
 ├── beat_studio.py          # Beat production engine
 ├── quality.py              # Audio quality assessment
@@ -96,8 +123,28 @@ claud-ear/
 ├── power.py                # Energy/sleep scheduling
 ├── dashboard.py            # Web dashboard
 ├── query.py                # Natural language music search
-└── docs/                   # Design docs & plans
+├── start_agent.sh          # Start autonomous agent
+├── stop_agent.sh           # Stop autonomous agent
+├── pause_at_130.sh         # Pause agent during peak hours
+└── docs/                   # Design docs & implementation plans
 ```
+
+## Autonomous Agent
+
+Run the autonomous music intelligence agent to batch-analyze your library:
+
+```bash
+# Analyze one song (test mode)
+uv run python agent.py --one
+
+# Run in continuous loop
+./start_agent.sh
+
+# Stop
+./stop_agent.sh
+```
+
+The agent scans `~/Documents/music/music data/`, finds pending tracks, analyzes them using the configured LLM backend, and writes full analysis documents to `~/Documents/music/analyses/`.
 
 ## License
 

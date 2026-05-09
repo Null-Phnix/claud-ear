@@ -19,7 +19,6 @@ Output per beat:
 import json
 import os
 import re
-import subprocess
 import sys
 import time
 from datetime import datetime
@@ -61,7 +60,6 @@ def _parse_filename(stem: str) -> tuple[str, str]:
 HERE       = Path(__file__).parent
 STUDIO_DIR = Path.home() / "Documents" / "music" / "beat_studio"
 DROP_DIR   = Path.home() / "Documents" / "music" / "beat_drops"
-CLAUDE_CMD = "claude"
 
 # ── MIDI constants (General MIDI drum map) ─────────────────────────────────────
 MIDI_KICK         = 36
@@ -295,13 +293,7 @@ def generate_drums_midi(bpm: float, path: Path, num_bars: int = 8) -> bool:
     return True
 
 
-# ── Claude lyric generation ────────────────────────────────────────────────────
-
-def _clean_env() -> dict:
-    env = os.environ.copy()
-    env.pop("CLAUDECODE", None)
-    return env
-
+# ── LLM lyric generation ───────────────────────────────────────────────────────
 
 def build_lyrics_prompt(spec: dict, wav_path: Path, output_dir: Path) -> str:
     lyrics_path = output_dir / "lyrics.md"
@@ -355,44 +347,56 @@ Use the Write tool for both files. Complete both tasks without stopping."""
 
 
 def generate_lyrics(spec: dict, wav_path: Path, output_dir: Path) -> bool:
+    """Generate lyrics + production notes using the configured LLM backend."""
     prompt = build_lyrics_prompt(spec, wav_path, output_dir)
     print("  Generating lyrics + production notes...")
+
     try:
-        result = subprocess.run(
-            [CLAUDE_CMD, "-p", prompt, "--allowedTools", "Write"],
-            capture_output=True, text=True, timeout=300,
-            env=_clean_env(), cwd=str(HERE),
-        )
-        if result.returncode != 0:
-            print(f"  Claude error ({result.returncode}): {result.stderr[:300]}")
-            return False
+        from llm_backend import call_llm, get_model
+        print(f"  Using {get_model()} via llm_backend...")
+        response = call_llm(prompt, timeout=300)
+
+        # Parse the response to extract lyrics and production notes
         lyrics_path = output_dir / "lyrics.md"
+        notes_path = output_dir / "production_notes.md"
+
+        # Try to split on obvious section markers
+        if "━━━ TASK 2:" in response:
+            parts = response.split("━━━ TASK 2:", 1)
+            lyrics_text = parts[0].replace("━━━ TASK 1: WRITE LYRICS ━━━", "").strip()
+            # Remove the file path lines from lyrics
+            lyrics_text = lyrics_text.replace(f"Write full song lyrics to: {lyrics_path}", "").strip()
+            lyrics_path.write_text(lyrics_text)
+
+            notes_text = parts[1].replace(f"Write production notes to: {notes_path}", "").strip()
+            notes_path.write_text(notes_text)
+        else:
+            # Just save the full response as lyrics, let LLM parse it
+            lyrics_path.write_text(response)
+
         return lyrics_path.exists()
-    except subprocess.TimeoutExpired:
-        print("  Claude timed out")
+    except ImportError:
+        print("  WARNING: llm_backend not found — cannot generate lyrics")
         return False
     except Exception as e:
-        print(f"  Error: {e}")
+        print(f"  LLM error: {e}")
         return False
 
 
 # ── Ableton integration ────────────────────────────────────────────────────────
 
 def try_ableton(bpm: float) -> bool:
-    prompt = (
-        f"Check if Ableton is connected using check_ableton_connection. "
-        f"If connected: call set_tempo with tempo={bpm}, then create_midi_track with name='Chords', "
-        f"then create_midi_track with name='Melody', then create_midi_track with name='Drums', "
-        f"then respond ABLETON_SUCCESS. If not connected respond ABLETON_OFFLINE."
-    )
+    """Check if Ableton is connected and set up tracks. Always returns gracefully."""
     try:
-        result = subprocess.run(
-            [CLAUDE_CMD, "-p", prompt,
-             "--allowedTools", "check_ableton_connection,set_tempo,create_midi_track"],
-            capture_output=True, text=True, timeout=60,
-            env=_clean_env(), cwd=str(HERE),
+        from llm_backend import call_llm
+        prompt = (
+            f"Check if Ableton is connected using check_ableton_connection. "
+            f"If connected: call set_tempo with tempo={bpm}, then create_midi_track with name='Chords', "
+            f"then create_midi_track with name='Melody', then create_midi_track with name='Drums', "
+            f"then respond ABLETON_SUCCESS. If not connected respond ABLETON_OFFLINE."
         )
-        if "ABLETON_SUCCESS" in result.stdout:
+        response = call_llm(prompt, timeout=60)
+        if "ABLETON_SUCCESS" in response:
             print(f"  Dropped into Ableton @ {bpm} BPM")
             return True
     except Exception:
