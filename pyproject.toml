@@ -1,0 +1,49 @@
+[project]
+name = "claud-ear"
+version = "1.0.0"
+description = "Claud-Ear — Give Claude the ability to listen to and understand music/audio files"
+readme = "README.md"
+license = {text = "MIT"}
+requires-python = ">=3.11,<3.14"
+authors = [
+    {name = "Josii / Null-Phnix"}
+]
+keywords = ["mcp", "audio", "music", "claude", "ai", "listening"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Multimedia :: Sound/Audio :: Analysis",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+dependencies = [
+    "mcp[cli]>=1.0.0",
+    "torch>=2.1.0",
+    "torchaudio>=2.1.0",
+    "transformers>=4.36.0",
+    "librosa>=0.10.0",
+    "soundfile>=0.12.0",
+    "numpy>=1.24.0",
+    "demucs>=4.0.0",
+    "yt-dlp>=2026.3.3",
+    "billboard.py>=3.0.0",
+    "spotipy>=2.23.0",
+    "rich>=13.0.0",
+    "midiutil>=1.2.1",
+    "torchcodec>=0.10.0",
+]
+
+[project.scripts]
+claud-ear = "server:mcp.run"
+
+[project.urls]
+Homepage = "https://github.com/Null-Phnix/claud-ear"
+Repository = "https://github.com/Null-Phnix/claud-ear"
+Issues = "https://github.com/Null-Phnix/claud-ear/issues"
+
+[dependency-groups]
+dev = []
